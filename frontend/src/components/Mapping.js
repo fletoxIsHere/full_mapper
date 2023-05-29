@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useFilesContext } from "../hooks/useFilesContext";
 import { useAuthContext } from "../hooks/useAuthContext";
+import { useNavigate } from "react-router-dom";
 import XLSX from "xlsx";
 
 const dictionnaires = [
@@ -192,6 +193,7 @@ const Mapping = () => {
   const [file, setFile] = useState();
   const [title, setTitle] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Handle file upload
   const handleFileUpload = (e) => {
@@ -287,6 +289,44 @@ const Mapping = () => {
     updatedColumnNames[index] = value;
     setModifiedColumnNames(updatedColumnNames);
   };
+  const validateInputs = () => {
+    const mandatoryFields = {
+      Patient: ["PatientNumber"],
+      Encounter: [
+        "PatientNumber",
+        "Hospital",
+        "StartDateTime",
+        "EndDateTime",
+        "EncounterNumber",
+      ],
+      Diagnosis: [
+        "EncounterNumber",
+        "DiagnosisCode",
+        "DiagnosisVersion",
+        "Sequence",
+      ],
+      Procedure: ["EncounterNumber", "ProcedureVersion", "ProcedureCode"],
+      Transfer: ["PatientNumber", "EncounterNumber", "Ward", "StartDateTime"],
+      Service: ["PatientNumber", "StartDateTime", "Quantity", "ServiceCode"],
+    };
+
+    const missingFields = [];
+
+    // Check if the selectedList is in the mandatoryFields object
+    if (selectedList && mandatoryFields[selectedList]) {
+      const requiredFields = mandatoryFields[selectedList];
+
+      // Check if any of the required fields are missing
+      requiredFields.forEach((field) => {
+        if (!modifiedColumnNames.includes(field)) {
+          missingFields.push(field);
+        }
+      });
+    }
+
+    // Return true if all required fields are filled in, otherwise return false
+    return missingFields.length === 0;
+  };
 
   const resetState = () => {
     setFileData(null);
@@ -298,70 +338,17 @@ const Mapping = () => {
     setFilteredData([]);
     setSelectedList([]);
   };
-  // const handleSaveChanges = () => {
-  //   const updatedFileData = [...fileData];
-  //   const modifiedColumnIndexes = {};
 
-  //   modifiedColumnNames.forEach((name, index) => {
-  //     if (name !== "") {
-  //       modifiedColumnIndexes[index] = true;
-  //       updatedFileData[0][index] = name;
-  //     }
-  //   });
-
-  //   // Create an object to store the column changes
-  //   const columnChanges = {};
-
-  //   filteredData.forEach((name, index) => {
-  //     columnChanges[name] = modifiedColumnNames[index] || ""; // Use empty string if no modification is made
-  //   });
-
-  //   // Console log the column changes object
-  //   console.log("Column Changes:", columnChanges);
-
-  //   // Create the data object to send to the backend
-  //   const dataToSend = {
-  //     columnChange: filteredData.reduce((result, name, index) => {
-  //       result[name] = modifiedColumnNames[index];
-  //       return result;
-  //     }, {}),
-  //     fileName: fileName, // Replace with the actual file name
-  //     //dictioner
-  //     originalFile: fileData, // Replace with the actual original file data
-  //   };
-
-  //   console.log("Data to send to backend:", dataToSend);
-
-  //   // Send the POST request to the backend
-  //   fetch("/api/save", {
-  //     method: "POST",
-  //     body: JSON.stringify(dataToSend),
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       // Handle the response from the backend
-  //       console.log("Response from backend:", data);
-  //       // ...
-  //     })
-  //     .catch((error) => {
-  //       // Handle errors
-  //       console.error("Error:", error);
-  //       // ...
-  //     });
-
-  //   const fileInput = document.getElementById("fileInput");
-  //   fileInput.value = null;
-  //   setColumnNames([]);
-  //   setModifiedColumnNames([]);
-  //   setFileData([]);
-  //   setIsSaving(false);
-  //   resetState();
-  // };
   const handleSaveChanges = async (e) => {
     e.preventDefault();
+    const isInputsValid = validateInputs();
+
+    if (!isInputsValid) {
+      // Required fields are not filled in, handle accordingly
+      console.log("Required fields are not filled in.");
+      // You can show an error message to the user or handle the scenario as per your requirement.
+      return;
+    }
     const updatedFileData = [...fileData];
     const modifiedColumnIndexes = {};
 
@@ -422,7 +409,7 @@ const Mapping = () => {
     console.log("Data to send to backend:", dataToSend);
 
     console.log(formData);
-    // send excel file   //add python api file
+    // send excel file
     fetch("/api/upload", {
       method: "POST",
       body: formData,
@@ -444,7 +431,7 @@ const Mapping = () => {
         // ...
       });
 
-    // Send the POST request to the backend // add python api information
+    // Send the POST request to the backend
     fetch("/api/save", {
       method: "POST",
       body: JSON.stringify(dataToSend),
@@ -464,13 +451,14 @@ const Mapping = () => {
         // ...
       });
 
-    // const fileInput = document.getElementById("fileInput");
-    // fileInput.value = null;
+    const fileInput = document.getElementById("fileInput");
+    fileInput.value = null;
     setColumnNames([]);
     setModifiedColumnNames([]);
     setFileData([]);
     setIsSaving(false);
     resetState();
+    navigate("/save");
   };
 
   // Enable save button when there are modifications
@@ -502,6 +490,7 @@ const Mapping = () => {
         </div>
         <label className="block">
           <input
+            id="fileInput"
             type="file"
             accept=".xlsx, .xls"
             className="block w-full text-sm text-slate-500

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useFilesContext } from "../hooks/useFilesContext";
 import { useAuthContext } from "../hooks/useAuthContext";
-import XLSX from "xlsx";
 
 const FileUpload = () => {
   const { dispatch } = useFilesContext();
