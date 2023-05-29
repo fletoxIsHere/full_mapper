@@ -403,7 +403,7 @@ const Mapping = () => {
         return result;
       }, {}),
       fileName: fileName, // Replace with the actual file name
-      fileType: fileType,
+      fileType: selectededData,
     };
 
     console.log("Data to send to backend:", dataToSend);
@@ -468,9 +468,9 @@ const Mapping = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Excel File Uploader</h1>
-      <div className="mb-4 flex justify-evenly items-center	">
+      <div className="mb-4 flex justify-evenly items-center sm:flex-col		">
         <div
-          className="border-solid border-2 border-slate-200 py-1 w-1/4 rounded-lg"
+          className="border-solid border-2 border-slate-200 py-1 w-1/4 rounded-lg sm:w-full	"
           style={{ background: "#36B697" }}
         >
           <h2 className="text-white font-bold px-4 py-2">
@@ -488,7 +488,7 @@ const Mapping = () => {
               ))}
           </ul>
         </div>
-        <label className="block">
+        <label className="block sm:w-full">
           <input
             id="fileInput"
             type="file"
@@ -504,12 +504,12 @@ const Mapping = () => {
           />
         </label>
 
-        <div className="flex items-center">
+        <div className="flex items-center sm:w-full">
           <h4 className="mr-3">Selected List: {selectedList}</h4>
           <select
             value={selectedList}
             onChange={handleListSelection}
-            className=" border w-auto border-emerald-300 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-600 block  p-2.5 dark:bg-emerald-400 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
+            className=" border w-auto border-emerald-300 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-600 block  p-2.5 dark:bg-emerald-500 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
             style={{ backgorund: "#36B697" }}
           >
             <option value="">Select a List</option>

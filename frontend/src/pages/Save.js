@@ -1,57 +1,62 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import XLSX from "xlsx";
 
 const Save = () => {
-  //   const [fileData, setFileData] = useState([]);
-  //   const [downloadUrl, setDownloadUrl] = useState("");
-  const [fileData, setFileData] = useState([
-    { column1: "Value 1", column2: "Value 2" },
-    { column1: "Value 3", column2: "Value 4" },
-    // Add more mock data as needed
-  ]);
+  const [fileData, setFileData] = useState([]);
+  const [downloadUrl, setDownloadUrl] = useState("");
 
-  const handleDownload = () => {
-    const data = [
-      ["Column 1", "Column 2"],
-      ["Value 1", "Value 2"],
-      ["Value 3", "Value 4"],
-      // Add more data rows as needed
-    ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch the Excel file from the backend
+        const response = await axios.get("/api/files", {
+          responseType: "arraybuffer",
+        });
+        const data = new Uint8Array(response.data);
+        const workbook = XLSX.read(data, { type: "array" });
 
-    const csvContent = data.map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "file.csv";
-    link.click();
+        // Extract the data from the desired sheet
+        const sheetName = workbook.SheetNames[0]; // Assuming the data is in the first sheet
+        const worksheet = workbook.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+        // Get the column names from the first row of jsonData
+        const columnNames = jsonData[0];
+
+        // Remove the first row (column names) from jsonData
+        const dataRows = jsonData.slice(1);
+
+        // Process the dataRows as needed and set fileData state
+        const formattedData = dataRows.map((row) =>
+          row.reduce(
+            (acc, value, index) => ({
+              ...acc,
+              [columnNames[index]]: value,
+            }),
+            {}
+          )
+        );
+        setFileData(formattedData);
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleDownload = async () => {
+    try {
+      // Download the file from the backend
+      const response = await axios.get("/api/download");
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      setDownloadUrl(url);
+    } catch (error) {
+      console.error("Error:", error);
+    }
   };
-
-  //   useEffect(() => {
-  //     const fetchData = async () => {
-  //       try {
-  //         // Fetch the file data from the backend
-  //         const response = await axios.get("/api/files");
-  //         setFileData(response.data);
-  //       } catch (error) {
-  //         console.error("Error:", error);
-  //       }
-  //     };
-
-  //     fetchData();
-  //   }, []);
-
-  //   const handleDownload = async () => {
-  //     try {
-  //       // Download the file from the backend
-  //       const response = await axios.get("/api/download");
-  //       const url = window.URL.createObjectURL(new Blob([response.data]));
-  //       setDownloadUrl(url);
-  //     } catch (error) {
-  //       console.error("Error:", error);
-  //     }
-  //   };
 
   return (
     <div className="container mx-auto p-4">
@@ -63,17 +68,21 @@ const Save = () => {
         <table className="w-full">
           <thead>
             <tr>
-              <th className="border-b-2 border-gray-300">Column 1</th>
-              <th className="border-b-2 border-gray-300">Column 2</th>
-              {/* Add more column headers as needed */}
+              {Object.keys(fileData[0]).map((columnName) => (
+                <th className="border-b-2 border-gray-300" key={columnName}>
+                  {columnName}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {fileData.map((row, index) => (
               <tr key={index}>
-                <td className="border-b border-gray-300 py-2">{row.column1}</td>
-                <td className="border-b border-gray-300 py-2">{row.column2}</td>
-                {/* Add more table cells for each column */}
+                {Object.values(row).map((cellValue, index) => (
+                  <td className="border-b border-gray-300 py-2" key={index}>
+                    {cellValue}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
@@ -83,20 +92,20 @@ const Save = () => {
       {/* Add a button for downloading the second file */}
       <div className="grid mt-12">
         <h2 className="text-lg font-semibold mb-2">Download File</h2>
-        {/* {downloadUrl ? (
+        {downloadUrl ? (
           <a href={downloadUrl} download>
             <button className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
               Download File
             </button>
           </a>
-        ) : ( */}
-        <button
-          className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
-          onClick={handleDownload}
-        >
-          Load File
-        </button>
-        {/* )} */}
+        ) : (
+          <button
+            className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+            onClick={handleDownload}
+          >
+            Load File
+          </button>
+        )}
       </div>
     </div>
   );
