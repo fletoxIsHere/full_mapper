@@ -1,27 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useFilesContext } from "../hooks/useFilesContext";
 import { useAuthContext } from "../hooks/useAuthContext";
-import { useNavigate } from "react-router-dom";
 import XLSX from "xlsx";
 
 const dictionnaires = [
-  { name: "patient" },
-  { name: "encounter" },
-  { name: "transfer" },
-  { name: "diagnosis" },
-  { name: "procedure" },
-  { name: "service " },
+  { name: "Patient" },
+  { name: "Encounter" },
+  { name: "Transfer" },
+  { name: "Diagnosis" },
+  { name: "Procedure" },
+  { name: "Service " },
 ];
 
-const patient = [
+const Patient = [
   "PatientNumber",
   "DateOfBirth",
   "Gender",
-  "Extra:PatientDeceased",
+  "PatientDeceased",
   "Extra:DateofDeath",
   "Extra:PlaceOfBirth",
   "EthnicOrigin",
-  "Extra:Nationality",
+  "Nationality",
   "LastName",
   "FirstName",
   "Title",
@@ -36,19 +35,92 @@ const patient = [
   "Extra:LastUpdateDateTime",
   "NationalIdentifier",
 ];
-const service = [
+const Service = [
   "PatientNumber",
+  "Hospital",
   "StartDateTime",
   "Quantity",
   "ServiceCode",
+  "Extra:PrimaryProcedure",
   "EncounterNumber",
+  "ServicingDepartment",
+  "Duration",
+  "ActualCharge",
+  "EndDateTime",
+  "PointOfService1",
   "Extra:ServiceDescription",
-  "ServiceGroup",
+  "Extra:ServiceGroup",
+  "Extra:LastUpdateDateTime",
+  "Consultant",
+  "Extra:ConsultantName",
+  "ConsultantSpecialty",
   "Clinic",
   "OrderDateTime",
+  "Extra:PriorityCode",
+  "Extra:Priority",
+  "Extra:StatusCode",
+  "Extra:StartDateTreatmentPlan",
+  "Extra:EndDateTreatmentPlan",
+  "Extra:RequestNo",
+  "Extra:OrderingDepartment",
+  "Extra:PrivateInsurance",
+  "Extra:OriginalServiceCode",
+  "Extra:OriginalServiceDesc",
+  "Extra:OriginalServiceGroup",
+  "Extra:RadiographerExamDuration",
+  "Extra:RadiologistLicence",
+  "Extra:RadiologistName",
+  "Extra:RadiologistSpecialty",
+  "Extra:RadiologistReportDateTime",
+  "Extra:RadiologistFinalisationDate",
+  "Extra:RadiologistReportDuration",
+  "Extra:StaffSignoff",
+  "Extra:CollectionTime",
+  "Extra:SampleReceivedTime",
+  "TestResult",
+  "Extra:SignatureDateTime",
+  "Extra:PathologistName",
+  "Extra:PathologistLicence",
+  "Extra:ServiceGroupDesc",
+  "Extra:DIN",
+  "Extra:StartDispenseTime",
+  "Extra:PrescriptionValidationTime",
+  "Extra:QuantityAdministered",
+  "Extra:QuantityPrescribed",
+  "Extra:ProcedureSpecialty",
+  "Extra:ElectiveOrEmergency",
+  "Extra:PreOpStart",
+  "Extra:PreOpEnd",
+  "Extra:AnaethesiaStart",
+  "Extra:AnaethesiaEnd",
+  "Extra:RecoveryStart",
+  "Extra:RecoveryEnd",
+  "Extra:NumberXtraMedicalStaff",
+  "Extra:NumberExtraPersons",
+  "Extra:NumberTheatreNurses",
+  "Extra:NumberTheatreNursesAux",
+  "Extra:OncologyFlag",
+  "Extra:PatientType",
+  "Extra:CancellationDate",
+  "Extra:CancellationReasonCode",
+  "Extra:CancellationReasonDesc",
+  "Extra:AnaesthetistCode",
+  "Extra:AnaesthetistName",
+  "Extra:AnaestheticTechnique",
+  "Extra:RequestStatus",
+  "Extra:PlannedSurgeryDate",
+  "Extra:OperationID",
+  "Extra:OperationStatus",
+  "EncounterType",
+  "Extra:PACUDuration",
+  "Extra:Implants",
+  "Extra:Site",
+  "Extra:TestName",
+  "Extra:OrderingConsultant",
+  "Extra:OrderingConsultantSpecialty"
 ];
 
-const encounter = [
+const Encounter = [
   "PatientNumber",
   "Hospital",
   "StartDateTime",
@@ -116,7 +188,7 @@ const encounter = [
   "Extra:TriageDesc",
 ];
 
-const transfer = [
+const Transfer = [
   "PatientNumber",
   "Extra:Hospital",
   "BedNumber",
@@ -134,7 +206,7 @@ const transfer = [
   "Extra:Site",
 ];
 
-const diagnosis = [
+const Diagnosis = [
   "Extra:SourcePatientNumber",
   "Extra:Hospital",
   "EncounterNumber",
@@ -158,7 +230,7 @@ const diagnosis = [
   "DiagnosisDescription",
   "Extra:LastUpdateDateTime",
 ];
-const procedure = [
+const Procedure = [
   "Last Name",
   "First Name",
   "Extra:SourcePatientNumber",
@@ -193,7 +265,6 @@ const Mapping = () => {
   const [file, setFile] = useState();
   const [title, setTitle] = useState("");
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   // Handle file upload
   const handleFileUpload = (e) => {
@@ -201,6 +272,7 @@ const Mapping = () => {
     setFileName(file.name);
     setFileType(file.type);
     setTitle(file.name);
+    setFile(file);
     const reader = new FileReader();
 
     reader.onload = (e) => {
@@ -216,6 +288,7 @@ const Mapping = () => {
 
     reader.readAsArrayBuffer(file);
   };
+  //console.log("le fichier", file)
   // hundle upload files
   const { files, dispatch } = useFilesContext();
   const { user } = useAuthContext();
@@ -247,23 +320,23 @@ const Mapping = () => {
     } else {
       let selectedArrayData;
       switch (selectedArrayName) {
-        case "patient":
-          selectedArrayData = patient;
+        case "Patient":
+          selectedArrayData = Patient;
           break;
-        case "encounter":
-          selectedArrayData = encounter;
+        case "Encounter":
+          selectedArrayData = Encounter;
           break;
-        case "transfer":
-          selectedArrayData = transfer;
+        case "Transfer":
+          selectedArrayData = Transfer;
           break;
-        case "diagnosis":
-          selectedArrayData = diagnosis;
+        case "Diagnosis":
+          selectedArrayData = Diagnosis;
           break;
-        case "procedure":
-          selectedArrayData = procedure;
+        case "Procedure":
+          selectedArrayData = Procedure;
           break;
-        case "service":
-          selectedArrayData = service;
+        case "Service":
+          selectedArrayData = Service;
           break;
         default:
           selectedArrayData = [];
@@ -289,44 +362,6 @@ const Mapping = () => {
     updatedColumnNames[index] = value;
     setModifiedColumnNames(updatedColumnNames);
   };
-  const validateInputs = () => {
-    const mandatoryFields = {
-      Patient: ["PatientNumber"],
-      Encounter: [
-        "PatientNumber",
-        "Hospital",
-        "StartDateTime",
-        "EndDateTime",
-        "EncounterNumber",
-      ],
-      Diagnosis: [
-        "EncounterNumber",
-        "DiagnosisCode",
-        "DiagnosisVersion",
-        "Sequence",
-      ],
-      Procedure: ["EncounterNumber", "ProcedureVersion", "ProcedureCode"],
-      Transfer: ["PatientNumber", "EncounterNumber", "Ward", "StartDateTime"],
-      Service: ["PatientNumber", "StartDateTime", "Quantity", "ServiceCode"],
-    };
-
-    const missingFields = [];
-
-    // Check if the selectedList is in the mandatoryFields object
-    if (selectedList && mandatoryFields[selectedList]) {
-      const requiredFields = mandatoryFields[selectedList];
-
-      // Check if any of the required fields are missing
-      requiredFields.forEach((field) => {
-        if (!modifiedColumnNames.includes(field)) {
-          missingFields.push(field);
-        }
-      });
-    }
-
-    // Return true if all required fields are filled in, otherwise return false
-    return missingFields.length === 0;
-  };
 
   const resetState = () => {
     setFileData(null);
@@ -339,16 +374,9 @@ const Mapping = () => {
     setSelectedList([]);
   };
 
+  // };
   const handleSaveChanges = async (e) => {
     e.preventDefault();
-    const isInputsValid = validateInputs();
-
-    if (!isInputsValid) {
-      // Required fields are not filled in, handle accordingly
-      console.log("Required fields are not filled in.");
-      // You can show an error message to the user or handle the scenario as per your requirement.
-      return;
-    }
     const updatedFileData = [...fileData];
     const modifiedColumnIndexes = {};
 
@@ -393,9 +421,10 @@ const Mapping = () => {
     });
 
     const formData = new FormData();
+    console.log("formData before:", file);
     formData.append("file", file);
 
-    console.log("Form Data to send to backend:", formData);
+    console.log("formData after:", formData);
     // Create the data object to send to the backend
     const dataToSend = {
       columnChange: filteredData.reduce((result, name, index) => {
@@ -403,21 +432,16 @@ const Mapping = () => {
         return result;
       }, {}),
       fileName: fileName, // Replace with the actual file name
-      fileType: selectededData,
+      fileType: selectedList,
     };
 
     console.log("Data to send to backend:", dataToSend);
 
-    console.log(formData);
-    // send excel file
-    fetch("/api/upload", {
+    //console.log(formData);
+    // send excel file   //add python api file
+    fetch("http://localhost:4000/", {
       method: "POST",
-      body: formData,
-      headers: {
-        "access-control-allow-origin": "*",
-        accept: "application/json",
-        "content-type": "multipart/form-data",
-      },
+      body: formData
     })
       .then((response) => response.json())
       .then((data) => {
@@ -431,11 +455,13 @@ const Mapping = () => {
         // ...
       });
 
-    // Send the POST request to the backend
-    fetch("/api/save", {
+    // Send the POST request to the backend // add python api information
+    fetch("http://localhost:5010", {
       method: "POST",
       body: JSON.stringify(dataToSend),
       headers: {
+        "access-control-allow-origin": "*",
+        accept: "application/json",
         "Content-Type": "application/json",
       },
     })
@@ -450,15 +476,13 @@ const Mapping = () => {
         console.error("Error:", error);
         // ...
       });
-
-    const fileInput = document.getElementById("fileInput");
-    fileInput.value = null;
+    // const fileInput = document.getElementById("fileInput");
+    // fileInput.value = null;
     setColumnNames([]);
     setModifiedColumnNames([]);
     setFileData([]);
     setIsSaving(false);
     resetState();
-    navigate("/save");
   };
 
   // Enable save button when there are modifications
@@ -468,9 +492,9 @@ const Mapping = () => {
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Excel File Uploader</h1>
-      <div className="mb-4 flex justify-evenly items-center sm:flex-col		">
+      <div className="mb-4 flex justify-evenly items-center	">
         <div
-          className="border-solid border-2 border-slate-200 py-1 w-1/4 rounded-lg sm:w-full	"
+          className="border-solid border-2 border-slate-200 py-1 w-1/4 rounded-lg"
           style={{ background: "#36B697" }}
         >
           <h2 className="text-white font-bold px-4 py-2">
@@ -488,11 +512,10 @@ const Mapping = () => {
               ))}
           </ul>
         </div>
-        <label className="block sm:w-full">
+        <label className="block">
           <input
-            id="fileInput"
             type="file"
-            accept=".xlsx, .xls"
+            //accept=".xlsx, .xls"
             className="block w-full text-sm text-slate-500
         file:mr-4 file:py-2 file:px-4
         file:rounded-full file:border-0
@@ -504,21 +527,21 @@ const Mapping = () => {
           />
         </label>
 
-        <div className="flex items-center sm:w-full">
+        <div className="flex items-center">
           <h4 className="mr-3">Selected List: {selectedList}</h4>
           <select
             value={selectedList}
             onChange={handleListSelection}
-            className=" border w-auto border-emerald-300 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-600 block  p-2.5 dark:bg-emerald-500 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
+            className=" border w-auto border-emerald-300 text-emerald-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-600 block  p-2.5 dark:bg-emerald-400 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500"
             style={{ backgorund: "#36B697" }}
           >
             <option value="">Select a List</option>
-            <option value="patient">patient</option>
-            <option value="encounter">encounter</option>
-            <option value="transfer">transfer</option>
-            <option value="diagnosis">diagnosis</option>
-            <option value="procedure">procedure</option>
-            <option value="service">service</option>
+            <option value="Patient">Patient</option>
+            <option value="Encounter">Encounter</option>
+            <option value="Transfer">Transfer</option>
+            <option value="Diagnosis">Diagnosis</option>
+            <option value="Procedure">Procedure</option>
+            <option value="Service">Service</option>
           </select>
         </div>
       </div>
