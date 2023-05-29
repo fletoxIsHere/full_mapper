@@ -6,12 +6,13 @@ import XLSX from "xlsx";
 const Save = () => {
   const [fileData, setFileData] = useState([]);
   const [downloadUrl, setDownloadUrl] = useState("");
+  const [disableDow, setDisableDow] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch the Excel file from the backend
-        const response = await axios.get("/api/files", {
+        const response = await axios.get("/api/fils", {
           responseType: "arraybuffer",
         });
         const data = new Uint8Array(response.data);
@@ -39,6 +40,7 @@ const Save = () => {
           )
         );
         setFileData(formattedData);
+        setDisableDow(false);
       } catch (error) {
         console.error("Error:", error);
       }
@@ -96,13 +98,14 @@ const Save = () => {
         <h2 className="text-lg font-semibold mb-2">Download File</h2>
         {downloadUrl ? (
           <a href={downloadUrl} download>
-            <button className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded">
+            <button className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded disabled:cursor-not-allowed">
               Download File
             </button>
           </a>
         ) : (
           <button
-            className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded"
+            disabled={disableDow}
+            className="bg-emerald-500 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded disabled:cursor-not-allowed"
             onClick={handleDownload}
           >
             Load File
