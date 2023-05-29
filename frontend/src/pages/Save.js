@@ -68,21 +68,23 @@ const Save = () => {
         <table className="w-full">
           <thead>
             <tr>
-              {Object.keys(fileData[0]).map((columnName) => (
-                <th className="border-b-2 border-gray-300" key={columnName}>
-                  {columnName}
-                </th>
-              ))}
+              {fileData.length > 0 &&
+                Object.keys(fileData[0]).map((columnName) => (
+                  <th className="border-b-2 border-gray-300" key={columnName}>
+                    {columnName}
+                  </th>
+                ))}
             </tr>
           </thead>
           <tbody>
             {fileData.map((row, index) => (
               <tr key={index}>
-                {Object.values(row).map((cellValue, index) => (
-                  <td className="border-b border-gray-300 py-2" key={index}>
-                    {cellValue}
-                  </td>
-                ))}
+                {row &&
+                  Object.values(row).map((cellValue, index) => (
+                    <td className="border-b border-gray-300 py-2" key={index}>
+                      {cellValue}
+                    </td>
+                  ))}
               </tr>
             ))}
           </tbody>
